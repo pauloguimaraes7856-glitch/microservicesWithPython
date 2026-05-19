@@ -34,6 +34,19 @@ For each bounded context you identify, fill in the table:
 
 There is no single correct answer: what matters is that you can justify each row.
 
+response:
+
+## Task 1 — Identify bounded contexts
+
+| Bounded Context | Responsibilities | Owned Entities | Team |
+| --------------- | ---------------- | -------------- | ---- |
+| Identity | Manages who users are, handles registration, login, profiles and sessions | User, Session | Platform |
+| Game Library | Manages games available on GameHub, including titles, genres and game metadata | Game, Genre, Platform | Content |
+| Activity | Tracks what users do on the platform, like playing games, sharing activity and engagement history | Activity, PlayHistory, UserGameActivity | Engagement |
+| Notification | Sends notifications to users when important events happen, for example friend activity or game updates | Notification, NotificationPreference | Communication |
+| Logging | Stores consent state and activity logs only when the user has opted in | Consent, ActivityLog | Compliance |
+| Recommendation | Suggests games or connections based on play history and community interests | Recommendation, RecommendationScore | Data |
+
 ---
 
 ## Task 2 — Define service contracts _(~30 min)_
@@ -56,6 +69,40 @@ Payload: { activity_id, user_id, action, game_id, timestamp }
 
 Focus on the flows that feel non-obvious. You do not need to document every possible pair.
 
+
+RESPNSE:
+
+- 1. activity-service → logging-service
+Trigger: a user activity happens, for example when a user plays a game.
+Protocol: RabbitMQ message (async)
+Payload: { activity_id, user_id, action, game_id, timestamp }
+
+Logging should be async because the user action should not be blocked if the logging-service is slow.
+
+
+- 2. activity-service → notification-service
+Trigger: a user shares an activity with friends or the community.
+Protocol: RabbitMQ message (async)
+Payload: { activity_id, user_id, game_id, action, timestamp }
+
+Notifications can be done in the background, so the activity does not need to wait.
+
+
+- 3. gateway → auth-service
+Trigger: a user logs in, registers, or sends a request with a token.
+Protocol: REST
+Payload: { email, password } or { token }
+
+The gateway needs an immediate answer to know if the request is allowed.
+
+
+- 4. recommendation-service → activity-service
+Trigger: the recommendation-service needs user activity history to suggest games.
+Protocol REST
+Payload: { user_id }
+
+The recommendation-service asks activity-service instead of reading its database directly.
+
 ---
 
 ## Task 3 — Draw the service map _(~20 min)_
@@ -68,6 +115,33 @@ Draw the full GameHub service map:
 - One box at the top labelled **gateway** — all client requests enter here, no client ever calls a service directly
 
 This can be a sketch on paper, a whiteboard photo, or ASCII art committed to your branch.
+
+RESPNSE:
+
+
+                 -----------
+                |  gateway  |
+                 ----------- 
+                  |   |   |
+                  |   |   |
+                 REST REST REST
+                  v   v   v
+
+           ------  ------   ------------------ 
+          | auth | | game | | activity-service |
+           ------  ------  ------------------
+                                      |     |
+                                 async|     |async
+                                      v     v
+
+                           +-------------------+
+                           | logging-service   |
+                           +-------------------+
+
+                            ------------------------
+                           | notification-service   |
+                            ------------------------
+
 
 ---
 

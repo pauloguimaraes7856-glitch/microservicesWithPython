@@ -4,8 +4,8 @@
 
 # Module 1 — Reflection
 
-**Team name**: **\*\***\_\_\_**\*\***
-**Branch**: `module-01/<team-name>`
+**Team name**: **Lesinvincibles** (willy and Paulo)
+**Branch**: `module-01/invincibles`
 **Submitted**: before Module 2 lesson
 
 ---
@@ -22,7 +22,7 @@ You started from a painful monolith. Now you're splitting it into separate servi
 
 Think about it from three angles: the developer who has to change code, the team that has to deploy it, and the user who has to live with its failures. You don't need to cover all three, pick the one that felt most real to you today.
 
-> _Your answer:_
+Splitting the monolith makes the project easier to manage for developers, instead of working on one huge application, each service has one responsibility. This makes changes safer and easier because working on the game-service should not break authentication or notifications.
 
 ---
 
@@ -34,7 +34,7 @@ Look at your service map. Every arrow between two services is a decision someone
 
 What would break, slow down, or become harder to manage if you merged those two services back together?
 
-> _Your answer:_
+I chose the boundary between activity-service and logging-service. For me, activity-service should only handle what users do on the platform, like playing a game or sharing an activity. Logging-service should only store logs and consent information. If we merged them, the service would mix user activity logic with logging and GDPR rules, so it would be harder to understand and maintain.
 
 ---
 
@@ -46,7 +46,7 @@ Microservices solve the monolith's problems. But they create new ones.
 
 No need to solve it: just name it honestly. This is exactly the tension the rest of the course is about.
 
-> _Your answer:_
+Communication was simpler in the monolith because everything was inside the same application. With microservices, services need REST calls or Rabbitmq messages to communicate, so there are more things to configure and more possible errors.
 
 ---
 
