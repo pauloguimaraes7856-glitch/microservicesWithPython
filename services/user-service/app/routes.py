@@ -12,7 +12,7 @@ service = UserService()
 @router.post("/v1/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     try:
-        return service.create_user(db, user)
+        return service.add_user(db, user)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -23,13 +23,13 @@ def list_users(
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db)
 ):
-    users, _ = service.get_users(db, limit, offset)
-    return users
+    result = service.fetch_all_users(db, limit, offset)
+    return result.items
 
 
 @router.get("/v1/users/{user_id}", response_model=UserResponse)
 def get_user(user_id: str, db: Session = Depends(get_db)):
-    user = service.get_user(db, user_id)
-    if not user:
+    try:
+        return service.fetch_user(db, user_id)
+    except ValueError:
         raise HTTPException(status_code=404, detail="User not found")
-    return user

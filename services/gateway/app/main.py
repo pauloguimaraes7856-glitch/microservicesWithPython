@@ -21,7 +21,6 @@ async def proxy(request: Request, full_path: str):
     path = full_path.strip("/")
     parts = path.split("/")
 
-    # Retire le préfixe "v1" pour identifier la ressource
     resource_parts = parts[1:] if parts[0] == "v1" else parts
 
     if not resource_parts:
@@ -33,8 +32,12 @@ async def proxy(request: Request, full_path: str):
     if not target_base:
         return Response(status_code=404, content=b"Unknown resource")
 
-    # Slash final pour éviter le 307 de FastAPI
-    downstream_path = "/" + path + "/"
+    # GET → slash final pour éviter 307
+    # POST/PUT/PATCH → pas de slash final (le 307 change POST en GET)
+    if request.method == "GET":
+        downstream_path = "/" + path + "/"
+    else:
+        downstream_path = "/" + path
 
     url = target_base.rstrip("/") + downstream_path
     print("TARGET URL:", url)
