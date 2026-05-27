@@ -1,7 +1,7 @@
 # Module 2 — Reflection
 
-**Team name**: _______________
-**Branch**: `module-02/<team-name>`
+**Team name**: Lesinvincibles (paulo and willy)
+**Branch**: `module-02/Lesinvincibles`
 **Submitted**: before Module 3 lesson
 
 ---
@@ -18,7 +18,7 @@ You built a service with distinct layers: models, schemas, repository, service, 
 
 Think about what happens six months later when someone new joins the team, or when you need to swap SQLite for PostgreSQL. What does the layered structure protect you from?
 
-> *Your answer:*
+Putting everything in one file would become messy really fast. With different layers, the code is cleaner and easier to understand. If someone new joins the project later, they can quickly know where things are.
 
 ---
 
@@ -30,7 +30,7 @@ Each service owns its data exclusively — no other service is allowed to touch 
 
 Give a concrete scenario, not a general principle.
 
-> *Your answer:*
+The game-service owns the Game entity. If another service could directly change the games table, it could add wrong data or break the catalogue. For example, a game could be added without a title or with bad information.
 
 ---
 
@@ -42,7 +42,7 @@ You now have models, schemas, a repository, a service, and routes — five layer
 
 And at what point does the complexity start to pay off? Where is the tipping point?
 
-> *Your answer:*
+For a small project, having many layers means more files and more setup for simple things. But when the project becomes bigger and more people work on it, the structure becomes useful and easier to manage.
 
 ---
 
