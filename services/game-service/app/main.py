@@ -7,4 +7,9 @@ from app.models import Game
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="game-service")
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 app.include_router(router)

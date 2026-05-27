@@ -13,7 +13,7 @@ Answer the three questions below. There are no right or wrong answers — we are
 ## 1. The "why"
 
 You built a service with distinct layers: models, schemas, repository, service, and routes — each with a single responsibility.
-
+ 
 **Why not just put everything in one file and call it done?**
 
 Think about what happens six months later when someone new joins the team, or when you need to swap SQLite for PostgreSQL. What does the layered structure protect you from?
