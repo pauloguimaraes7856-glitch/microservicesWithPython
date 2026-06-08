@@ -13,15 +13,12 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import Base, engine, get_db
 from app import repository, schemas
+from app.infrastructure.rabbitmq_publisher import publish_activity_event  # ✅ Ajouté Module 4
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="activity-service")
 
-
-# ---------------------------------------------------------------------------
-# YOUR TASK — implement the two functions below
-# ---------------------------------------------------------------------------
 
 async def validate_user(user_id: str) -> None:
     """
@@ -59,10 +56,6 @@ async def fetch_game(game_id: str) -> dict | None:
     raise NotImplementedError
 
 
-# ---------------------------------------------------------------------------
-# Endpoints — pre-written, they call your two functions above
-# ---------------------------------------------------------------------------
-
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "activity-service"}
@@ -73,6 +66,16 @@ async def create_activity(data: schemas.ActivityCreate, db: Session = Depends(ge
     await validate_user(data.user_id)
     activity = repository.create_activity(db, data)
     game_data = await fetch_game(activity.game_id)
+
+    # ✅ Ajouté Module 4 — publier l'événement dans RabbitMQ
+    game_title = game_data["title"] if game_data else None
+    await publish_activity_event(
+        user_id=activity.user_id,
+        game_id=activity.game_id,
+        action=activity.action,
+        game_title=game_title,
+    )
+
     return {
         "id": activity.id,
         "user_id": activity.user_id,
