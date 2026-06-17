@@ -1,5 +1,6 @@
 import httpx
 from fastapi import FastAPI, Request, Response
+from jose import JWTError, jwt
 
 from app.config import settings
 
@@ -14,7 +15,11 @@ ROUTES: dict[str, str] = {
     # Added in Module 5
     "consent":    settings.logging_service_url,
     "logs":       settings.logging_service_url,
+    # Added in Module 6
+    "auth":       settings.auth_service_url,
 }
+
+PUBLIC_PATHS = {"v1/auth/token", "v1/auth/token/"}
 
 
 @app.get("/health")
@@ -30,6 +35,17 @@ async def proxy(request: Request, path: str):
         return Response(status_code=404, content="Not found")
 
     resource = segments[1]
+
+    # Step 1.5 — JWT validation (the token endpoint stays public)
+    if path not in PUBLIC_PATHS:
+        auth_header = request.headers.get("authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return Response(status_code=401, content="Missing or invalid token")
+        token = auth_header.split(" ", 1)[1]
+        try:
+            jwt.decode(token, settings.secret_key, algorithms=["HS256"])
+        except JWTError:
+            return Response(status_code=401, content="Missing or invalid token")
 
     # Step 2 — look up the target service
     target_base = ROUTES.get(resource)
