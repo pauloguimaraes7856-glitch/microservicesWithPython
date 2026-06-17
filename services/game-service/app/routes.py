@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import service, schemas
+from app.infrastructure.cache import get_game_summary
 
 router = APIRouter(prefix="/v1/games", tags=["games"])
 
@@ -23,3 +24,10 @@ def get_game(game_id: str, db: Session = Depends(get_db)):
         return service.fetch_game(db, game_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/{game_id}/summary")
+def get_game_summary_endpoint(game_id: str):
+    data = get_game_summary(game_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="No summary cached for this game")
+    return data
